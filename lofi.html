@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" class="transition-colors duration-300">
+  <head>
+    <meta charset="UTF-8" />
+    <title>lofi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+      };
+    </script>
+    <style>
+      #player {
+        width: 0;
+        height: 0;
+        visibility: hidden;
+      }
+    </style>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2214%22 font-size=%2216%22>🎵</text></svg>">
+  </head>
+  <body class="bg-white text-black dark:bg-black dark:text-white flex items-center justify-center min-h-screen">
+    <div class="text-center space-y-8">
+      <!-- Dark Mode Toggle -->
+      <button id="theme-toggle" class="p-2 rounded-full bg-white text-black dark:bg-white dark:text-black border border-black" aria-label="Toggle Dark Mode">
+        <!-- Icons -->
+        <svg id="theme-toggle-light-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zM4 11a1 1 0 100-2H3a1 1 0 000 2h1zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zM10 18a1 1 0 011-1v-1a1 1 0 10-2 0v1a1 1 0 011 1z" />
+        </svg>
+        <svg id="theme-toggle-dark-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+        </svg>
+      </button>
+
+      <!-- Controls -->
+      <div class="flex justify-center space-x-6">
+        <!-- Play -->
+        <button id="play" class="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center shadow">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M6 4l10 6-10 6V4z" />
+          </svg>
+        </button>
+
+        <!-- Pause -->
+        <button id="pause" class="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center shadow">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M6 4h4v12H6V4zm4 0h4v12h-4V4z" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Volume -->
+      <div class="w-64 mx-auto">
+        <label for="volume" class="block mb-2">Volume</label>
+        <input type="range" id="volume" min="0" max="100" value="50" class="w-full accent-gray-900">
+      </div>
+    </div>
+
+    <!-- Hidden YouTube Player -->
+    <div id="player"></div>
+
+    <!-- Scripts -->
+    <script>
+      var tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      document.head.appendChild(tag);
+
+      var player;
+      function onYouTubeIframeAPIReady() {
+        player = new YT.Player('player', {
+          height: '0',
+          width: '0',
+          videoId: 'jfKfPfyJRdk',
+          events: {
+            'onReady': onPlayerReady
+          }
+        });
+      }
+
+      function onPlayerReady() {
+        document.getElementById('play').onclick = () => player.playVideo();
+        document.getElementById('pause').onclick = () => player.pauseVideo();
+        document.getElementById('volume').oninput = e => player.setVolume(e.target.value);
+      }
+
+      // Dark Mode Toggle
+      const toggleBtn = document.getElementById('theme-toggle');
+      const darkIcon = document.getElementById('theme-toggle-dark-icon');
+      const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+      if (
+        localStorage.getItem('color-theme') === 'dark' ||
+        (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
+      ) {
+        document.documentElement.classList.add('dark');
+        lightIcon.classList.remove('hidden');
+      } else {
+        document.documentElement.classList.remove('dark');
+        darkIcon.classList.remove('hidden');
+      }
+
+      toggleBtn.addEventListener('click', () => {
+        darkIcon.classList.toggle('hidden');
+        lightIcon.classList.toggle('hidden');
+        if (document.documentElement.classList.contains('dark')) {
+          document.documentElement.classList.remove('dark');
+          localStorage.setItem('color-theme', 'light');
+        } else {
+          document.documentElement.classList.add('dark');
+          localStorage.setItem('color-theme', 'dark');
+        }
+      });
+    </script>
+  </body>
+</html>
