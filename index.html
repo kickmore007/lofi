@@ -6,7 +6,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
-        darkMode: 'class',
+        darkMode: "class",
       };
     </script>
     <style>
@@ -15,113 +15,377 @@
         height: 0;
         visibility: hidden;
       }
-      /* Force smooth gradient-like transition */
-      html, body {
+      html,
+      body {
         transition: background-color 1s ease, color 1s ease !important;
       }
+      /* Playlist effects */
+      #now-playing-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+      }
+      #now-playing-bar {
+
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      /* Update the playlist style to be scrollable */
+      #playlist {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+      }
+      .dark #playlist {
+        background: rgba(0, 0, 0, 0.9);
+      }
+      #now-playing-container.active #playlist {
+        max-height: 200px; /* Adjust this value as needed */
+        overflow-y: auto; /* Makes it scrollable when content overflows */
+      }
+      /* Custom scrollbar styling */
+      #playlist::-webkit-scrollbar {
+        width: 6px;
+      }
+      #playlist::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+      }
+      #playlist::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+      }
+      .dark #playlist::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .dark #playlist::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+      }
+      #now-playing-container.active #now-playing-bar {
+        opacity: 1;
+      }
+      /* Chevron rotation */
+      #chevron {
+        transition: transform 0.3s ease;
+      }
+      #now-playing-container.active #chevron {
+        transform: rotate(180deg);
+      }
+      /* Custom scrollbar - hides default and adds stylish replacement */
+      #playlist div::-webkit-scrollbar {
+        width: 8px; /* Width of the custom scrollbar */
+      }
+
+      /* Track - the background of the scrollbar */
+      #playlist div::-webkit-scrollbar-track {
+        background: transparent; /* Fully transparent track */
+      }
+
+      /* Thumb - the draggable part */
+      #playlist div::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+        transition: background 0.3s ease;
+      }
+
+      /* Dark mode thumb */
+      .dark #playlist div::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      /* Hover effect */
+      #playlist div::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, 0.3);
+      }
+      .dark #playlist div::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      /* Hide scrollbar when not scrolling */
+      #playlist div {
+        scrollbar-width: thin; /* For Firefox */
+        scrollbar-color: rgba(0, 0, 0, 0.2) transparent; /* For Firefox */
+      }
+      .dark #playlist div {
+        scrollbar-color: rgba(255, 255, 255, 0.2) transparent; /* For Firefox */
+      }
     </style>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2214%22 font-size=%2216%22>🎵</text></svg>">
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2214%22 font-size=%2216%22>🎵</text></svg>"
+    />
   </head>
-  <body class="bg-white text-black dark:bg-black dark:text-white flex items-center justify-center min-h-screen">
+
+  <body
+    class="bg-white text-black dark:bg-black dark:text-white flex items-center justify-center min-h-screen"
+  >
     <!-- Dark Mode Toggle (Top Right) -->
-    <button id="theme-toggle" class="absolute top-4 right-4 p-2 rounded-full bg-white text-black hover:scale-[1.1] transition duration-300 dark:bg-white dark:text-black shadow" aria-label="Toggle Dark Mode">
-      <svg id="theme-toggle-light-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20">
-        <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zM4 11a1 1 0 100-2H3a1 1 0 000 2h1zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zM10 18a1 1 0 011-1v-1a1 1 0 10-2 0v1a1 1 0 011 1z" />
+    <button
+      id="theme-toggle"
+      class="absolute top-4 right-4 p-2 rounded-full bg-white text-black hover:scale-[1.1] transition duration-300 dark:bg-white dark:text-black shadow"
+      aria-label="Toggle Dark Mode"
+    >
+      <svg
+        id="theme-toggle-light-icon"
+        class="w-6 h-6 hidden"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path
+          d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zM4 11a1 1 0 100-2H3a1 1 0 000 2h1zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zM10 18a1 1 0 011-1v-1a1 1 0 10-2 0v1a1 1 0 011 1z"
+        />
       </svg>
-      <svg id="theme-toggle-dark-icon" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+      <svg
+        id="theme-toggle-dark-icon"
+        class="w-6 h-6"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path
+          d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"
+        />
       </svg>
     </button>
 
     <!-- Main Content (Centered) -->
     <div class="text-center space-y-8">
-      <!-- Single Play/Pause Toggle Button -->
-      <button id="play-pause" class="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center shadow hover:scale-[1.1] transition duration-300 mx-auto">
-        <!-- Pause Icon (default) -->
-        <svg id="pause-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
-          <path fill-rule="evenodd" d="M6.75 5.25a.75.75 0 0 1 .75-.75H9a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V5.25Zm7.5 0A.75.75 0 0 1 15 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H15a.75.75 0 0 1-.75-.75V5.25Z" clip-rule="evenodd" />
-        </svg>
-        <!-- Play Icon (hidden by default) -->
-        <svg id="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6 hidden">
-          <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd" />
+      <!-- Play/Pause Button -->
+      <button
+        id="play-pause"
+        class="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center shadow hover:scale-[1.1] transition duration-300 mx-auto"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          class="size-6"
+        >
+          <path
+            d="M15 6.75a.75.75 0 0 0-.75.75V18a.75.75 0 0 0 .75.75h.75a.75.75 0 0 0 .75-.75V7.5a.75.75 0 0 0-.75-.75H15ZM20.25 6.75a.75.75 0 0 0-.75.75V18c0 .414.336.75.75.75H21a.75.75 0 0 0 .75-.75V7.5a.75.75 0 0 0-.75-.75h-.75ZM5.055 7.06C3.805 6.347 2.25 7.25 2.25 8.69v8.122c0 1.44 1.555 2.343 2.805 1.628l7.108-4.061c1.26-.72 1.26-2.536 0-3.256L5.055 7.061Z"
+          />
         </svg>
       </button>
 
       <!-- Volume -->
       <div class="w-64 mx-auto">
         <label for="volume" class="block mb-2">Volume</label>
-        <input type="range" id="volume" min="0" max="100" value="50" class="w-full bg-white dark:bg-black accent-black dark:accent-white">
+        <input
+          type="range"
+          id="volume"
+          min="0"
+          max="100"
+          value="50"
+          class="w-full bg-white dark:bg-black accent-black dark:accent-white"
+        />
       </div>
     </div>
 
+    <!-- Now Playing Bar with Hidden Playlist -->
+    <div id="now-playing-container">
+      <!-- Clickable Bar with chevron -->
+      <div
+        id="now-playing-bar"
+        class="py-2 px-4 hover:opacity-100 flex justify-between items-center"
+      >
+        <p class="text-sm">
+          Now Playing: <span id="video-title">Loading...</span>
+        </p>
+        <!-- Single rotating chevron (starts pointing up) -->
+        <svg
+          id="chevron"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          class="size-4"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M11.47 7.72a.75.75 0 0 1 1.06 0l7.5 7.5a.75.75 0 1 1-1.06 1.06L12 9.31l-6.97 6.97a.75.75 0 0 1-1.06-1.06l7.5-7.5Z"
+            clip-rule="evenodd"
+          />
+        </svg>
+      </div>
+
+      <!-- Update the playlist div to include a fixed height container -->
+      <div id="playlist" class="">
+        <div
+          class="space-y-1 px-4 pb-2 max-h-[180px] overflow-y-auto scroll-smooth"
+        >
+          <!-- Added scroll-smooth for better UX -->
+          <p
+            class="text-xs opacity-100 mb-1 sticky top-0 bg-white dark:bg-black z-10"
+          >
+            Switch stream:
+          </p>
+          <a
+            href="#"
+            data-video-id="jfKfPfyJRdk"
+            class="block text-sm hover:opacity-100 opacity-80 hover:bg-gray-100 dark:hover:bg-gray-800 py-1 rounded transition"
+            >lofi hip hop radio 📚</a
+          >
+          <a
+            href="#"
+            data-video-id="HuFYqnbVbzY"
+            class="block text-sm hover:opacity-100 opacity-80 hover:bg-gray-100 dark:hover:bg-gray-800 py-1 rounded transition"
+            >coffee shop jazz ☕</a
+          >
+          <a
+            href="#"
+            data-video-id="Na0w3Mz46GA"
+            class="block text-sm hover:opacity-100 opacity-80 hover:bg-gray-100 dark:hover:bg-gray-800 py-1 rounded transition"
+            >asian lofi ⛩️</a
+          >
+          <a
+            href="#"
+            data-video-id="TtkFsfOP9QI"
+            class="block text-sm hover:opacity-100 opacity-80 hover:bg-gray-100 dark:hover:bg-gray-800 py-1 rounded transition"
+            >peaceful piano 🎹</a
+          >
+          <a
+            href="#"
+            data-video-id="aUG--f5qZjo"
+            class="block text-sm hover:opacity-100 opacity-80 hover:bg-gray-100 dark:hover:bg-gray-800 py-1 rounded transition"
+            >made from dreams.</a
+          >
+          <a
+            href="#"
+            data-video-id="DFuFDdL9sl4"
+            class="block text-sm hover:opacity-100 opacity-80 hover:bg-gray-100 dark:hover:bg-gray-800 py-1 rounded transition"
+            >quiet solitude.</a
+          >
+          <a
+            href="#"
+            data-video-id="h8UpC5JbMU0"
+            class="block text-sm hover:opacity-100 opacity-80 hover:bg-gray-100 dark:hover:bg-gray-800 py-1 rounded transition"
+            >minecraft</a
+          >
+        </div>
+      </div>
+    </div>
     <!-- Hidden YouTube Player -->
     <div id="player"></div>
 
-    <!-- Scripts -->
     <script>
-      var tag = document.createElement('script');
+      var tag = document.createElement("script");
       tag.src = "https://www.youtube.com/iframe_api";
       document.head.appendChild(tag);
 
+      // Automatically extract streams from HTML playlist links
+      const streams = Array.from(document.querySelectorAll("#playlist a")).map(
+        (link) => ({
+          id: link.getAttribute("data-video-id"),
+          title: link.textContent.trim(),
+        })
+      );
+
+      // Playlist toggle logic
+      const nowPlayingContainer = document.getElementById(
+        "now-playing-container"
+      );
+      const nowPlayingBar = document.getElementById("now-playing-bar");
+
+      nowPlayingBar.addEventListener("click", (e) => {
+        e.stopPropagation();
+        nowPlayingContainer.classList.toggle("active");
+      });
+
+      // Close when clicking elsewhere
+      document.addEventListener("click", () => {
+        nowPlayingContainer.classList.remove("active");
+      });
+
+      // Prevent playlist clicks from closing
+      document.getElementById("playlist").addEventListener("click", (e) => {
+        e.stopPropagation();
+      });
+
       var player;
       function onYouTubeIframeAPIReady() {
-        player = new YT.Player('player', {
-          height: '0',
-          width: '0',
-          videoId: 'jfKfPfyJRdk',
+        player = new YT.Player("player", {
+          height: "0",
+          width: "0",
+          videoId: streams[0].id,
           events: {
-            'onReady': onPlayerReady
-          }
+            onReady: onPlayerReady,
+            onStateChange: onPlayerStateChange,
+          },
         });
       }
 
       function onPlayerReady() {
-        const playPauseBtn = document.getElementById('play-pause');
-        const playIcon = document.getElementById('play-icon');
-        const pauseIcon = document.getElementById('pause-icon');
+        // Set initial title from our custom list
+        document.getElementById("video-title").textContent = streams[0].title;
 
-        playPauseBtn.onclick = () => {
+        document.getElementById("play-pause").onclick = () => {
           if (player.getPlayerState() === YT.PlayerState.PLAYING) {
             player.pauseVideo();
-            pauseIcon.classList.add('hidden');
-            playIcon.classList.remove('hidden');
           } else {
             player.playVideo();
-            pauseIcon.classList.remove('hidden');
-            playIcon.classList.add('hidden');
           }
         };
 
-        document.getElementById('volume').oninput = e => player.setVolume(e.target.value);
+        document.getElementById("volume").oninput = (e) =>
+          player.setVolume(e.target.value);
+
+        // Playlist click handler - use our custom titles
+        document.querySelectorAll("#playlist a").forEach((link, index) => {
+          link.addEventListener("click", (e) => {
+            e.preventDefault();
+            player.loadVideoById(streams[index].id);
+            document.getElementById("video-title").textContent =
+              streams[index].title;
+            nowPlayingContainer.classList.remove("active");
+          });
+        });
+      }
+
+      function onPlayerStateChange(event) {
+        if (event.data === YT.PlayerState.PLAYING) {
+          // Find which stream is currently playing and use our custom title
+          const currentVideoId = player.getVideoData().video_id;
+          const currentStream = streams.find(
+            (stream) => stream.id === currentVideoId
+          );
+          if (currentStream) {
+            document.getElementById("video-title").textContent =
+              currentStream.title;
+          }
+        }
       }
 
       // Dark Mode Toggle
-      const toggleBtn = document.getElementById('theme-toggle');
-      const darkIcon = document.getElementById('theme-toggle-dark-icon');
-      const lightIcon = document.getElementById('theme-toggle-light-icon');
+      const toggleBtn = document.getElementById("theme-toggle");
+      const darkIcon = document.getElementById("theme-toggle-dark-icon");
+      const lightIcon = document.getElementById("theme-toggle-light-icon");
 
       if (
-        localStorage.getItem('color-theme') === 'dark' ||
-        (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        localStorage.getItem("color-theme") === "dark" ||
+        (!("color-theme" in localStorage) &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches)
       ) {
-        document.documentElement.classList.add('dark');
-        lightIcon.classList.remove('hidden');
-        darkIcon.classList.add('hidden');
+        document.documentElement.classList.add("dark");
+        lightIcon.classList.remove("hidden");
+        darkIcon.classList.add("hidden");
       } else {
-        document.documentElement.classList.remove('dark');
-        darkIcon.classList.remove('hidden');
-        lightIcon.classList.add('hidden');
+        document.documentElement.classList.remove("dark");
+        darkIcon.classList.remove("hidden");
+        lightIcon.classList.add("hidden");
       }
 
-      toggleBtn.addEventListener('click', () => {
-        darkIcon.classList.toggle('hidden');
-        lightIcon.classList.toggle('hidden');
-        if (document.documentElement.classList.contains('dark')) {
-          document.documentElement.classList.remove('dark');
-          localStorage.setItem('color-theme', 'light');
+      toggleBtn.addEventListener("click", () => {
+        darkIcon.classList.toggle("hidden");
+        lightIcon.classList.toggle("hidden");
+        if (document.documentElement.classList.contains("dark")) {
+          document.documentElement.classList.remove("dark");
+          localStorage.setItem("color-theme", "light");
         } else {
-          document.documentElement.classList.add('dark');
-          localStorage.setItem('color-theme', 'dark');
+          document.documentElement.classList.add("dark");
+          localStorage.setItem("color-theme", "dark");
         }
       });
     </script>
